@@ -2,11 +2,17 @@
     <div id="resume">
         <style-editor ref="styleEditor" :code="currentStyle"></style-editor>
         <resume-editor ref="resumeEditor" :markdown="currentMarkdown" :isHtml="isHtml"></resume-editor>
-        <r-footer ref="footer"></r-footer>
+        <r-footer ref="rFooter" 
+            :isPaused="isPaused" 
+            :isSkipped="isSkipped"
+            @onPaused="onPaused"
+            @onSkipped="onSkipped"
+        ></r-footer>
     </div>
 </template>
 
 <script>
+import Promise from 'bluebird';
 // @ 即 /src 的别名 alias
 import RFooter from '@/components/resume/Footer';
 import ResumeEditor from '@/components/resume/ResumeEditor';
@@ -31,6 +37,7 @@ export default {
     },
     data() {
         return {
+            interval: 40,                                // 定时器时间
             markdown,                                   // 简历 md
             styleList: width > 500 ?                    // css段落数组 通过 /*divide*/ 分隔
                 styleStr.split('/*divide*/') :
@@ -38,24 +45,37 @@ export default {
             currentStyle: '',                           // 显示的css段落
             currentMarkdown: '',                        // 显示的md段落
             isHtml: false,                              // md是否显示为html
-            interval: 40                                // 定时器时间
+            isPaused: false,                            // 是否暂停
+            isSkipped: false                            // 是否跳过动画
         };
     },
     created() {
         this.startAnimation();
     },
     methods: {
-        /**
-         * 开始简历展示流程
-         */
-        startAnimation: async function() {
-            await this.progressivelyShowStyle(0);
-            await this.progressivelyShowResume();
-            await this.progressivelyShowStyle(1);
-            await this.showHtml();
-            debugger;
-            await this.progressivelyShowStyle(2);
+        onPaused: function(bool) {
+            this.isPaused = bool;
         },
+        onSkipped: function() {
+            this.isSkipped = true;
+        },
+        // 开始简历展示流程
+        startAnimation: async function() {
+            try {
+                await this.progressivelyShowStyle(0);
+                debugger;
+                await this.progressivelyShowResume();
+                await this.progressivelyShowStyle(1);
+                await this.showHtml();
+                await this.progressivelyShowStyle(2);
+                this.$refs.rFooter.end();
+            } catch (e) {
+                if (e.message === 'SKIP IT') {
+                    this.skipAnimation();
+                }
+            }
+        },
+        // md 展示为 html
         showHtml: function () {
             return new Promise((resolve, reject) => {
                 try {
@@ -69,35 +89,43 @@ export default {
         // 阶段性展示 css 
         progressivelyShowStyle(n) {
             return new Promise((resolve, reject) => {
-                try {
-                    const interval = this.interval;
-                    const showStyle = (async function() {
-                        // 获取当前 css 段落
-                        const style = this.styleList[n];
-                        if (!style) return;
-                        // 计算前 n 个 style 的字符总数
-                        const length = this.styleList.filter((_, index) => index <= n).reduce((p, c) => p + c.length, 0);
-                        // 每个 css 段落模块开始输出前都需要将 l 重新变为 0
-                        // 所以要 现长 减去对应 已输出模块的长度
-                        const preLength = length - style.length;
-                        if (this.currentStyle.length < length) {
-                            const l = this.currentStyle.length - preLength;
-                            const char = style.substring(l, l + 1) || ' ';
-                            this.currentStyle += char;
-                            if (style.substring(l - 1, l) === '\n' && this.$refs.styleEditor) {
-                                this.$nextTick(() => {
-                                    this.$refs.styleEditor.goBottom();
-                                })
-                            }
-                            setTimeout(showStyle, interval);
-                        } else {
-                            resolve()
+                const interval = this.interval;
+                const showStyle = (async function() {
+                    // 暂停
+                    do {
+                        await Promise.delay(interval);
+                    } while (this.isPaused)
+
+                    // 跳过动画
+                    if (this.isSkipped) {
+                        reject(new Error('SKIP IT'));
+                    }
+
+                    // 获取当前 css 段落
+                    const style = this.styleList[n];
+                    if (!style) return;
+
+                    // 计算前 n 个 style 的字符总数
+                    // 每个 css 段落模块开始输出前都需要将 l 重新变为 0
+                    // 所以要 现长 减去对应 已输出模块的长度
+                    const length = this.styleList.filter((_, index) => index <= n).reduce((p, c) => p + c.length, 0);
+                    const preLength = length - style.length;
+
+                    if (this.currentStyle.length < length) {
+                        const l = this.currentStyle.length - preLength;
+                        const char = style.substring(l, l + 1) || ' ';
+                        this.currentStyle += char;
+                        if (style.substring(l - 1, l) === '\n' && this.$refs.styleEditor) {
+                            this.$nextTick(() => {
+                                this.$refs.styleEditor.goBottom();
+                            })
                         }
-                    }).bind(this);
-                    showStyle();
-                } catch (error) {
-                    reject(error);
-                }
+                        setTimeout(showStyle, interval);
+                    } else {
+                        resolve()
+                    }
+                }).bind(this);
+                showStyle();
             });
         },
         // 展示简历 markdown
@@ -123,13 +151,18 @@ export default {
                     reject(error);
                 }
             });
+        },
+        // 跳过动画
+        skipAnimation() {
+            this.currentMarkdown = this.markdown.substring();
+            this.currentStyle = this.styleList.join('/n');
+            this.showHtml();
+            this.$refs.rFooter.end();
         }
     }
 }
 </script>
 
 <style lang="scss" scoped>
-#resume {
-    position: absolute;
-}
+
 </style>
