@@ -1,7 +1,12 @@
 /*
 * Inspired by http://strml.net/
-* 大家好，我是方方
-* 二月了，好多公司都在招聘，你是不是也在准备简历呀。
+* 基于方应杭 (https://github.com/jirengu-inc/animating-resume)
+* 以及黄轶的 github (https://github.com/ustbhuangyi/resume)
+*
+* 大家好，我是 ego
+* 为了避免公司打印机打印简历的尴尬和满大街寻找打印店的窘迫,
+* 我希望可以有一份会动的简历在我个人网站上
+*
 * 说做就做，我也来写一份简历！
 */
 
@@ -50,15 +55,15 @@
   }
   /* 好了，我开始写简历了 */
   
-/*divide*/  
-
+  /*divide*/
+  
   /* 这个简历好像差点什么
    * 对了，这是 Markdown 格式的，我需要变成对 HR 更友好的格式
    * 简单，用开源工具翻译成 HTML 就行了
    */
- 
-/*divide*/ 
 
+   /*divide*/
+   
   /* 再对 HTML 加点样式 */
   .resumeEditor{
     padding: 2em;
