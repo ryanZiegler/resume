@@ -17,7 +17,10 @@ import StyleEditor from '@/components/resume/StyleEditor';
 // styleList = styleStr.default.split('/*divide*/');
 // debugger;
 import styleStr from '!raw-loader!@/components/resume/style.css';
+import styleStrMobile from '!raw-loader!@/components/resume/styleMobile.css';
 import markdown from '!raw-loader!@/components/resume/resume.md';
+
+var width = document.documentElement.clientWidth;
 
 export default {
     name: 'resume',
@@ -29,7 +32,9 @@ export default {
     data() {
         return {
             markdown,                                   // 简历 md
-            styleList: styleStr.split('/*divide*/'),    // css段落数组 通过 /*divide*/ 分隔
+            styleList: width > 500 ?                    // css段落数组 通过 /*divide*/ 分隔
+                styleStr.split('/*divide*/') :
+                styleStrMobile.split('/*divide*/'),
             currentStyle: '',                           // 显示的css段落
             currentMarkdown: '',                        // 显示的md段落
             isHtml: false,                              // md是否显示为html

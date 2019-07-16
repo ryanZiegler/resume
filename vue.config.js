@@ -4,7 +4,7 @@ module.exports = {
         module: {
             rules: [
                 {
-                    test: /\.css$/,
+                    test: /\.txt$/,
                     use: 'raw-loader'
                 }
             ]
