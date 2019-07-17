@@ -29,10 +29,6 @@ export default {
 </script>
 
 <style scoped>
-  @media (max-width:500px){
-    pre{
-    }
-  }
   .code {
     display: none;
   }

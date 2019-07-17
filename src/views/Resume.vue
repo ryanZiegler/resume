@@ -63,7 +63,6 @@ export default {
         startAnimation: async function() {
             try {
                 await this.progressivelyShowStyle(0);
-                debugger;
                 await this.progressivelyShowResume();
                 await this.progressivelyShowStyle(1);
                 await this.showHtml();
@@ -94,13 +93,12 @@ export default {
                     // 暂停
                     do {
                         await Promise.delay(interval);
-                    } while (this.isPaused)
+                    } while (this.isPaused && !this.isSkipped)
 
                     // 跳过动画
                     if (this.isSkipped) {
-                        reject(new Error('SKIP IT'));
+                        return reject(new Error('SKIP IT'));
                     }
-
                     // 获取当前 css 段落
                     const style = this.styleList[n];
                     if (!style) return;
@@ -111,19 +109,19 @@ export default {
                     const length = this.styleList.filter((_, index) => index <= n).reduce((p, c) => p + c.length, 0);
                     const preLength = length - style.length;
 
-                    if (this.currentStyle.length < length) {
-                        const l = this.currentStyle.length - preLength;
-                        const char = style.substring(l, l + 1) || ' ';
-                        this.currentStyle += char;
-                        if (style.substring(l - 1, l) === '\n' && this.$refs.styleEditor) {
-                            this.$nextTick(() => {
-                                this.$refs.styleEditor.goBottom();
-                            })
-                        }
-                        setTimeout(showStyle, interval);
-                    } else {
-                        resolve()
+                    if (this.currentStyle.length >= length) return resolve();
+             
+                    const l = this.currentStyle.length - preLength;
+                    const char = style.substring(l, l + 1) || ' ';
+                    this.currentStyle += char;
+                    if (style.substring(l - 1, l) === '\n' && this.$refs.styleEditor) {
+                        this.$nextTick(() => {
+                            this.$refs.styleEditor.goBottom();
+                        })
                     }
+                    // setTimeout(showStyle, interval);
+                    requestAnimationFrame(showStyle);
+                  
                 }).bind(this);
                 showStyle();
             });
@@ -133,18 +131,17 @@ export default {
             return new Promise((resolve, reject) => {
                 try {
                     const length = this.markdown.length;
-                    const interval = this.interval;
+                    // const interval = this.interval;
                     const showResume = () => {
-                        if (this.currentMarkdown.length < length) {
-                            this.currentMarkdown = this.markdown.substring(0, this.currentMarkdown.length + 1);
-                            let prevChar = this.currentMarkdown[this.currentMarkdown.length - 2];
-                            if (prevChar === '\n' && this.$refs.resumeEditor) {
-                                this.$nextTick(() => this.$refs.resumeEditor.goBottom());
-                            }
-                            setTimeout(showResume, interval);
-                        } else {
-                            resolve();
+                        if (this.currentMarkdown.length >= length) return resolve();
+
+                        this.currentMarkdown = this.markdown.substring(0, this.currentMarkdown.length + 1);
+                        let prevChar = this.currentMarkdown[this.currentMarkdown.length - 2];
+                        if (prevChar === '\n' && this.$refs.resumeEditor) {
+                            this.$nextTick(() => this.$refs.resumeEditor.goBottom());
                         }
+                        // setTimeout(showResume, interval);
+                        requestAnimationFrame(showResume);
                     }
                     showResume();
                 } catch (error) {
@@ -155,14 +152,17 @@ export default {
         // 跳过动画
         skipAnimation() {
             this.currentMarkdown = this.markdown.substring();
-            this.currentStyle = this.styleList.join('/n');
+            this.currentStyle = this.styleList.join('');
             this.showHtml();
             this.$refs.rFooter.end();
+            this.$nextTick(() => {
+                this.$refs.styleEditor.goBottom();
+            });
         }
     }
 }
 </script>
 
-<style lang="scss" scoped>
+<style>
 
 </style>

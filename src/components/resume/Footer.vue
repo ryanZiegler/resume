@@ -1,7 +1,7 @@
 <template>
     <footer>
-        <a href="#" v-show="!isEnd" @click.prevent="togglePause">{{ text }}</a>
-        <a href="#" v-show="!isEnd" @click.prevent="skip">跳过动画 --></a>
+        <button v-show="!isEnd" @click.prevent="togglePause">{{ text }}</button>
+        <button v-show="!isEnd" @click.prevent="skip">跳过动画</button>
     </footer>
 </template>
 
@@ -16,7 +16,7 @@ export default {
     },
     computed: {
       text() {
-        return this.status ? '继续 >>' : '暂停 ||';
+        return this.status ? '继续' : '暂停';
       }
     },
     methods: {
@@ -37,8 +37,27 @@ export default {
 <style lang='scss' scoped>
 footer {
     position: absolute;
-    bottom: 0;
+    bottom: 10px;
     left: 50%;
-    transform: translate3d(-50%, 50%, 0);
+    transform: translate3d(-50%, 0, 0);
+    button {
+        background: none;
+        border: 2px solid #a972cb;
+        color: #a972cb;
+        font: inherit;
+        line-height: 1;
+        margin: 0.5em;
+        padding: .8em 2em;
+        -webkit-transition: 0.25s;
+        transition: 0.25s;
+        --color: #a972cb;
+        --hover: #cb72aa;
+        &:hover, &.focus {
+            border-color: var(--coler);
+            color: #fff;
+            box-shadow: inset 0 0 0 2em var(--hover);
+        }
+    }
+
 }
 </style>
