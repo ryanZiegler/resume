@@ -24,7 +24,7 @@ import StyleEditor from '@/components/resume/StyleEditor';
 // debugger;
 import styleStr from '!raw-loader!@/components/resume/style.css';
 import styleStrMobile from '!raw-loader!@/components/resume/styleMobile.css';
-import markdown from '!raw-loader!@/components/resume/resume.md';
+import markdown from '!raw-loader!@/doc/resume.md';
 
 var width = document.documentElement.clientWidth;
 
