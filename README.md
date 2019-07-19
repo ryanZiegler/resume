@@ -7,6 +7,7 @@
 也应运于我此时最迫切的求职需求而生.
 
 ## 预览
+预览地址: [点击这里](http://www.iiamego.com/resume)
 
 ![avatar](http://cdn.iiamego.com/resume.png)
 
