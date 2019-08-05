@@ -85,10 +85,8 @@ html {
 .resumeEditor ol {
   counter-reset: section;
 }
-.resumeEditor ol li::before {
-  counter-increment: section;
-  content: counters(section, ".") " ";
-  margin-right: .5em;
+.resumeEditor ol li {
+  margin-top: 1em;
 }
 .resumeEditor blockquote {
   margin: 1em;
